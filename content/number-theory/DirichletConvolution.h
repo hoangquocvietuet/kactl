@@ -1,7 +1,7 @@
 /**
  * Author: ShahjalalShohag
  * Date: 2023
- * Description: Prefix sum of multiplicative functions :
+ * Description: Prefix sum of multiplicative functions $O(n^2/3)$:
  * - $p_f$ : the prefix sum of $f(x)$ $(1 \le x \le T)$.
  * - $p_g$ : the prefix sum of $g(x)$ $(0 \le x \le N)$.
  * - $p_c$ : the prefix sum of $f * g(x)$ $(0 \le x \le N)$.
@@ -9,7 +9,7 @@
  * Magic Functions for different f(x)
  * For $f(x) = phi(x)$: $Id(x) = phi \times I(x)$ i.e. $p_c =$ prefix sum of $Id(x)$, $p_g =$ prefix sum of $I(x)$. Here $Id(n) = n, I(n) = 1$
  * For $f(x) = mu(x)$: $e(x) = mu \times I(x)$. Here $e(x) = x == 1 ? 1 : 0$.
- * Complexity: $O(n^(2/3))$
+
  */
 
 namespace Dirichlet {
