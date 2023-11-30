@@ -1,74 +1,89 @@
 /**
- * Author: Stanford
- * Date: Unknown
- * Source: Stanford Notebook
- * Description: KD-tree (2d, can be extended to 3d)
- * Status: Tested on excellentengineers
+ * Author: ShahjalalShohag
+ * Description: KD-tree
  */
 #pragma once
 
-#include "Point.h"
+const int N = 1e5 + 9;
+const long long INF = 2000000000000000007;
+const int d = 2; ///dimension
 
-typedef long long T;
-typedef Point<T> P;
-const T INF = numeric_limits<T>::max();
-
-bool on_x(const P& a, const P& b) { return a.x < b.x; }
-bool on_y(const P& a, const P& b) { return a.y < b.y; }
-
-struct Node {
-	P pt; // if this is a leaf, the single point in it
-	T x0 = INF, x1 = -INF, y0 = INF, y1 = -INF; // bounds
-	Node *first = 0, *second = 0;
-
-	T distance(const P& p) { // min squared distance to a point
-		T x = (p.x < x0 ? x0 : p.x > x1 ? x1 : p.x);
-		T y = (p.y < y0 ? y0 : p.y > y1 ? y1 : p.y);
-		return (P(x,y) - p).dist2();
-	}
-
-	Node(vector<P>&& vp) : pt(vp[0]) {
-		for (P p : vp) {
-			x0 = min(x0, p.x); x1 = max(x1, p.x);
-			y0 = min(y0, p.y); y1 = max(y1, p.y);
-		}
-		if (vp.size() > 1) {
-			// split on x if width >= height (not ideal...)
-			sort(all(vp), x1 - x0 >= y1 - y0 ? on_x : on_y);
-			// divide by taking half the array for each child (not
-			// best performance with many duplicates in the middle)
-			int half = sz(vp)/2;
-			first = new Node({vp.begin(), vp.begin() + half});
-			second = new Node({vp.begin() + half, vp.end()});
-		}
-	}
+struct point {
+  int p[d];
+  bool operator !=(const point &a) const {
+    bool ok = 1;
+    for(int i = 0; i < d; i++) ok &= (p[i] == a.p[i]);
+    return !ok;
+  }
 };
 
-struct KDTree {
-	Node* root;
-	KDTree(const vector<P>& vp) : root(new Node({all(vp)})) {}
-
-	pair<T, P> search(Node *node, const P& p) {
-		if (!node->first) {
-			// uncomment if we should not find the point itself:
-			// if (p == node->pt) return {INF, P()};
-			return make_pair((p - node->pt).dist2(), node->pt);
-		}
-
-		Node *f = node->first, *s = node->second;
-		T bfirst = f->distance(p), bsec = s->distance(p);
-		if (bfirst > bsec) swap(bsec, bfirst), swap(f, s);
-
-		// search closest side first, other side if needed
-		auto best = search(f, p);
-		if (bsec < best.first)
-			best = min(best, search(s, p));
-		return best;
-	}
-
-	// find nearest point to a point, and its squared distance
-	// (requires an arbitrary operator< for Point)
-	pair<T, P> nearest(const P& p) {
-		return search(root, p);
-	}
+struct kd_node {
+  int axis, value;
+  point p;
+  kd_node *left, *right;
 };
+
+struct cmp_points {
+  int axis;
+  cmp_points() {}
+  cmp_points(int x): axis(x) {}
+  bool operator () (const point &a, const point &b) const {
+    return a.p[axis] < b.p[axis];
+  }
+};
+
+typedef kd_node* node_ptr;
+
+int tests, n;
+point arr[N], pts[N];
+node_ptr root;
+long long ans;
+
+long long squared_distance(point a, point b) {
+  long long ans = 0;
+  for(int i = 0; i < d; i++) ans += (a.p[i] - b.p[i]) * 1ll * (a.p[i] - b.p[i]);
+  return ans;
+}
+
+void build_tree(node_ptr &node, int from, int to, int axis) {
+  if(from > to) {
+    node = NULL;
+    return;
+  }
+
+  node = new kd_node();
+
+  if(from == to) {
+    node->p = arr[from];
+    node->left = NULL;
+    node->right = NULL;
+    return;
+  }
+
+  int mid = (from + to) / 2;
+
+  nth_element(arr + from, arr + mid, arr + to + 1, cmp_points(axis));
+  node->value = arr[mid].p[axis];
+  node->axis = axis;
+  build_tree(node->left, from, mid, (axis + 1) % d);
+  build_tree(node->right, mid + 1, to, (axis + 1) % d);
+}
+
+void nearest_neighbor(node_ptr node, point q, long long &ans) {
+  if(node == NULL) return;
+
+  if(node->left == NULL && node->right == NULL) {
+    if(q != node->p) ans = min(ans, squared_distance(node->p, q)); ///Beware!!! take care here
+    return;
+  }
+
+  if(q.p[node->axis] <= node->value) {
+    nearest_neighbor(node->left, q, ans);
+    if(q.p[node->axis] + sqrt(ans) >= node->value) nearest_neighbor(node->right, q, ans);
+  }
+
+  else {
+    nearest_neighbor(node->right, q, ans);
+    if(q.p[node->axis] - sqrt(ans) <= node->value) nearest_neighbor(node->left, q, ans);
+  }
+}
