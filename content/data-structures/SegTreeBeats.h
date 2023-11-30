@@ -5,7 +5,6 @@
  * Description: 
  */
 
-
 struct segbeat{
 	int mi[4 * N], semi[4 * N];
 	int ma[4 * N], sema[4 * N];
