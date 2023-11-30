@@ -1,11 +1,9 @@
 /**
- * Author: Lukas Polacek
- * Date: 2009-09-28
- * License: CC0
- * Source: folklore
- * Description: Operators for modular arithmetic. You need to set {\tt mod} to
- * some number first and then you can use the structure.
+ * Author: ShahjalalShohag
+ * Date: 2023-11-30
+ * Description:
  */
+
 #pragma once
 
 template <int32_t MOD>
