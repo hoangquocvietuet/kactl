@@ -1,38 +1,40 @@
 /**
- * Author: Lukas Polacek
- * Date: 2009-10-28
- * License: CC0
- * Source:
- * Description: Simple bipartite matching algorithm. Graph $g$ should be a list
- * of neighbors of the left partition, and $btoa$ should be a vector full of
- * -1's of the same size as the right partition. Returns the size of
- * the matching. $btoa[i]$ will be the match for vertex $i$ on the right side,
- * or $-1$ if it's not matched.
- * Time: O(VE)
- * Usage: vi btoa(m, -1); dfsMatching(g, btoa);
- * Status: works
+ * Author: DeMen100ns
+ * Date: 2023
+ * Description: DeMen-Kuhn (Kuhn with Russian optimize)
+ * Time: O(VE) but very fast in practice
  */
 #pragma once
 
-bool find(int j, vector<vi>& g, vi& btoa, vi& vis) {
-	if (btoa[j] == -1) return 1;
-	vis[j] = 1; int di = btoa[j];
-	for (int e : g[di])
-		if (!vis[e] && find(e, g, btoa, vis)) {
-			btoa[e] = di;
-			return 1;
-		}
-	return 0;
+vector <int> a[N];
+int mr[N], cttme;
+bool ml[N];
+char f[N];
+
+bool dfs(int u){
+    if (f[u] == cttme) return false;
+    f[u] = cttme;
+    for(int i : a[u]){
+        if (!mr[i] || dfs(mr[i])){
+            mr[i] = u;
+            return true;
+        }
+    }
+    return false;
 }
-int dfsMatching(vector<vi>& g, vi& btoa) {
-	vi vis;
-	rep(i,0,sz(g)) {
-		vis.assign(sz(btoa), 0);
-		for (int j : g[i])
-			if (find(j, g, btoa, vis)) {
-				btoa[j] = i;
-				break;
-			}
-	}
-	return sz(btoa) - (int)count(all(btoa), -1);
+
+int maximum_matching(){
+    int cnt = 0;
+    for(bool run = true; run;){
+        cttme++;
+        run = false;
+        for(int i = 1; i <= n; ++i){
+            if (ml[i]) continue;
+            if (dfs(i)){
+                ml[i] = run = true;
+                ++cnt;
+            }
+        }
+    }
+    return cnt;
 }
