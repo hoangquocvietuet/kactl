@@ -1,8 +1,11 @@
 /**
  * Author: DeMen100ns
  * Date: 2023
- * Description: 
+ * Description:
  */
+#pragma once
+
+const int N = 2e5 + 5;
 
 struct segbeat{
 	int mi[4 * N], semi[4 * N];
