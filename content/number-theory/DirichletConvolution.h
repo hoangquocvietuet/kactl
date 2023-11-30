@@ -7,9 +7,9 @@
  * - $p_c$ : the prefix sum of $f * g(x)$ $(0 \le x \le N)$.
  * - $T$ : the threshold, generally should be $n^{(2 / 3)}$. for $n = 1e9, T = 1e6$
  * Magic Functions for different f(x)
- * For f(x) = phi(x): Id(x) = phi * I(x) i.e. p_c = prefix sum of Id(x), p_g = prefix sum of I(x). Here Id(n) = n, I(n) = 1
- * For f(x) = mu(x): e(x) = mu * I(x). Here e(x) = x == 1 ? 1 : 0
- * Complexity: O(n^(2/3))
+ * For $f(x) = phi(x)$: $Id(x) = phi \times I(x)$ i.e. $p_c =$ prefix sum of $Id(x)$, $p_g =$ prefix sum of $I(x)$. Here $Id(n) = n, I(n) = 1$
+ * For $f(x) = mu(x)$: $e(x) = mu \times I(x)$. Here $e(x) = x == 1 ? 1 : 0$.
+ * Complexity: $O(n^(2/3))$
  */
 
 namespace Dirichlet {
