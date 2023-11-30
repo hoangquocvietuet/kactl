@@ -1,7 +1,6 @@
 /**
  * Author: DeMen100ns
  * Date: 2023
- * License: CC0
  * Description: 
  */
 
