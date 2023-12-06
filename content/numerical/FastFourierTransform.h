@@ -1,8 +1,7 @@
 /**
  * Description: Fast Fourier Transform.
  * Time: O(nlogn).
- * Note: p: a's rank, q: b's rank => n = p + q + 1
- * Use: fft(a, n, false), fft(b, n, false), fft(c, n, true)
+ * Usage: fft(a, n, false), fft(b, n, false), fft(c, n, true)
  */
 
 const double PI = acos(-1);
