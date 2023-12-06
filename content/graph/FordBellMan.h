@@ -1,6 +1,6 @@
-// Ford Bellman, O(N*M)
-// Tested:
-// - https://cses.fi/problemset/task/1673
+/**
+ * Description: Ford-Bellman algorithm for shortest path
+ */ 
 using ll = long long;
 const ll INF = 4e18;
 struct Edge { int u, v; ll cost; }; // one-direction
