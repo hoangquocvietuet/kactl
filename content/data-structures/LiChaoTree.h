@@ -1,52 +1,74 @@
 /**
- * Author: DeMen100ns
- * Date: 2023
- * Description: 
+ * Description: Lichao Tree for maximum convex hull trick.
+ * Time: O(logn) per operation.
  */
 
-struct LiChaoTree{
-    const int N = 3e5 + 5;
-    Line seg[4 * N];
-    void upd(int id, int l, int r, Line line){
-        if (l == r){
-            if (line(l) < seg[id](l)) seg[id] = line;
-            return;
-        }
+const int N = (int)2e5 + 228;
+const long long INF = (long long)1e18;
 
-        int mid = (l + r) >> 1;
-
-        if (line.a < seg[id].a) swap(seg[id], line);
-
-        if (line(mid) < seg[id](mid)){
-            swap(seg[id], line);
-            upd(id << 1 | 1, mid + 1, r, line);
-        } else {
-            upd(id << 1, l, mid, line);
-        }
+struct line
+{
+    long long a, b;
+    line(long long _a = INF, long long _b = INF)
+    {
+        a = _a, b = _b;
     }
-
-    int get(int id, int l, int r, int x){
-        if (l == r) return seg[id](x);
-
-        int ans, mid = (l + r) >> 1;
-        if (mid >= x){
-            ans = get(id << 1, l, mid, x);
-        } else {
-            ans = get(id << 1 | 1, mid + 1, r, x);
-        }
-
-        return min(ans, seg[id](x));
-    }
-
-    void updr(int id, int l, int r, int u, int v, Line line){
-        if (l > v || r < u || l > r) return;
-        if (l >= u && r <= v){
-            upd(id, l, r, line);
-            return;
-        }
-
-        int mid = (l + r) >> 1;
-        updr(id << 1, l, mid, u, v, line);
-        updr(id << 1 | 1, mid + 1, r, u, v, line);
+    long long operator*(long long x)
+    {
+        if (a == 0)
+            return b;
+        if (abs((INF - b) / a) < abs(x))
+            return INF;
+        return a * x + b;
     }
 };
+
+struct LichaoTree
+{
+    vector<line> tree;
+    int n;
+
+    LichaoTree(int _n = 0)
+    {
+        n = _n;
+        tree.assign(n * 4 + 7, line(INF, INF));
+    }
+
+    // upd đoạn thẳng cho các giá trị x từ l -> r
+    void add(int id, int l, int r, line &x)
+    {
+        int len = (r - l + 1), m = l + (len + 1) / 2 - 1;
+        bool lef = (tree[id] * l > x * l);
+        bool mid = (tree[id] * m > x * m);
+        if (mid)
+        {
+            swap(tree[id], x);
+        }
+        if (len == 1)
+            return;
+        if (lef != mid)
+            add(id * 2, l, m, x);
+        else
+            add(id * 2 + 1, m + 1, r, x);
+    }
+    void add(line x)
+    {
+        add(1, 1, n, x);
+    }
+
+    // tính đoạn thẳng tốt nhất cho giá trị x
+    long long calc(int id, int l, int r, int k, long long x)
+    {
+        long long res = tree[id] * x;
+        int len = (r - l + 1), m = l + (len + 1) / 2 - 1;
+        if (len == 1)
+            return res;
+        if (k <= m)
+            return min(res, calc(id * 2, l, m, k, x));
+        return min(res, calc(id * 2 + 1, m + 1, r, k, x));
+    }
+    long long calc(int k, long long x)
+    {
+        return calc(1, 1, n, k, x);
+    }
+} it;

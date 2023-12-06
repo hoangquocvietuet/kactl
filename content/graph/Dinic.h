@@ -1,53 +1,87 @@
 /**
- * Author: chilli
- * Date: 2019-04-26
- * License: CC0
- * Source: https://cp-algorithms.com/graph/dinic.html
- * Description: Flow algorithm with complexity $O(VE\log U)$ where $U = \max |\text{cap}|$.
- * $O(\min(E^{1/2}, V^{2/3})E)$ if $U = 1$; $O(\sqrt{V}E)$ for bipartite matching.
- * Status: Tested on SPOJ FASTFLOW and SPOJ MATCHING, stress-tested
+ * Description: Dinic's algorithm for maximum flow.
+ * Time: O(V^2E)
  */
-#pragma once
-
-struct Dinic {
-	struct Edge {
-		int to, rev;
-		ll c, oc;
-		ll flow() { return max(oc - c, 0LL); } // if you need flows
-	};
-	vi lvl, ptr, q;
-	vector<vector<Edge>> adj;
-	Dinic(int n) : lvl(n), ptr(n), q(n), adj(n) {}
-	void addEdge(int a, int b, ll c, ll rcap = 0) {
-		adj[a].push_back({b, sz(adj[b]), c, c});
-		adj[b].push_back({a, sz(adj[a]) - 1, rcap, rcap});
-	}
-	ll dfs(int v, int t, ll f) {
-		if (v == t || !f) return f;
-		for (int& i = ptr[v]; i < sz(adj[v]); i++) {
-			Edge& e = adj[v][i];
-			if (lvl[e.to] == lvl[v] + 1)
-				if (ll p = dfs(e.to, t, min(f, e.c))) {
-					e.c -= p, adj[e.to][e.rev].c += p;
-					return p;
-				}
-		}
-		return 0;
-	}
-	ll calc(int s, int t) {
-		ll flow = 0; q[0] = s;
-		rep(L,0,31) do { // 'int L=30' maybe faster for random data
-			lvl = ptr = vi(sz(q));
-			int qi = 0, qe = lvl[s] = 1;
-			while (qi < qe && !lvl[t]) {
-				int v = q[qi++];
-				for (Edge e : adj[v])
-					if (!lvl[e.to] && e.c >> (30 - L))
-						q[qe++] = e.to, lvl[e.to] = lvl[v] + 1;
-			}
-			while (ll p = dfs(s, t, LLONG_MAX)) flow += p;
-		} while (lvl[t]);
-		return flow;
-	}
-	bool leftOfMinCut(int a) { return lvl[a] != 0; }
+const int N = 2020;
+const int INF = (int)1e9 + 9072004;
+struct edge
+{
+    int v, cap, flow;
+    edge(int _v = 0, int _cap = 0, int _flow = 0)
+    {
+        v = _v, cap = _cap, flow = _flow;
+    }
 };
+
+vector<edge> E;
+int n, m, c[N], cur[N];
+vector<int> adj[N];
+int src, snk, dist[N];
+queue<int> q;
+
+void addEdge(int u, int v, int cap)
+{
+    adj[u].push_back(E.size());
+    E.push_back(edge(v, cap, 0));
+    adj[v].push_back(E.size());
+    E.push_back(edge(u, 0, 0));
+}
+
+void bfs()
+{
+    dist[src] = 0;
+    q.push(src);
+    // for(int i=0 ; i<(int)E.size() ; ++i) cout << E[i].v << " " << E[i].cap << " " << E[i].flow << '\n';
+    while (q.size())
+    {
+        int u = q.front();
+        q.pop();
+        for (int i = 0; i < (int)adj[u].size(); ++i)
+        {
+            int id = adj[u][i];
+            int v = E[id].v;
+            if (E[id].cap > E[id].flow && dist[v] > dist[u] + 1)
+            {
+                dist[v] = dist[u] + 1;
+                q.push(v);
+            }
+        }
+    }
+}
+
+bool findPath()
+{
+    for (int i = src; i <= snk; ++i)
+        dist[i] = INF;
+    bfs();
+    return (dist[snk] != INF);
+}
+
+int incFlow(int u, int flowIn)
+{
+    if (u == snk)
+        return flowIn;
+    int flowOut = 0;
+    for (; cur[u] < (int)adj[u].size(); cur[u]++)
+    {
+        int id = adj[u][cur[u]], v = E[id].v;
+        if (E[id].cap == E[id].flow || dist[v] != dist[u] + 1)
+            continue;
+        int tmp = incFlow(v, min(flowIn, E[id].cap - E[id].flow));
+        E[id].flow += tmp, E[id ^ 1].flow -= tmp;
+        flowOut += tmp, flowIn -= tmp;
+        if (flowIn == 0)
+            break;
+    }
+    return flowOut;
+}
+
+void solve()
+{
+    while (findPath())
+    {
+        for (int i = src; i <= snk; ++i)
+            cur[i] = 0;
+        maxFlow += incFlow(src, INF);
+    }
+}

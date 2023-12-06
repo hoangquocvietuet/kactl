@@ -1,85 +1,81 @@
 /**
- * Author: Simon Lindholm
- * Date: 2015-02-18
- * License: CC0
- * Source: marian's (TC) code
- * Description: Aho-Corasick automaton, used for multiple pattern matching.
- * Initialize with AhoCorasick ac(patterns); the automaton start node will be at index 0.
- * find(word) returns for each position the index of the longest word that ends there, or -1 if none.
- * findAll($-$, word) finds all words (up to $N \sqrt N$ many if no duplicate patterns)
- * that start at each position (shortest first).
- * Duplicate patterns are allowed; empty patterns are not.
- * To find the longest words that start at each position, reverse all input.
- * For large alphabets, split each symbol into chunks, with sentinel bits for symbol boundaries.
- * Time: construction takes $O(26N)$, where $N =$ sum of length of patterns.
- * find(x) is $O(N)$, where N = length of x. findAll is $O(NM)$.
- * Status: stress-tested
+ * Description: Aho Corasick.
+ * Time: O(26 * n).
+ * fail: like kmp
+ * next[c]: node will jump to if add char c after current position
  */
-#pragma once
 
-struct AhoCorasick {
-	enum {alpha = 26, first = 'A'}; // change this!
-	struct Node {
-		// (nmatches is optional)
-		int back, next[alpha], start = -1, end = -1, nmatches = 0;
-		Node(int v) { memset(next, v, sizeof(next)); }
-	};
-	vector<Node> N;
-	vi backp;
-	void insert(string& s, int j) {
-		assert(!s.empty());
-		int n = 0;
-		for (char c : s) {
-			int& m = N[n].next[c - first];
-			if (m == -1) { n = m = sz(N); N.emplace_back(-1); }
-			else n = m;
-		}
-		if (N[n].end == -1) N[n].start = j;
-		backp.push_back(N[n].end);
-		N[n].end = j;
-		N[n].nmatches++;
-	}
-	AhoCorasick(vector<string>& pat) : N(1, -1) {
-		rep(i,0,sz(pat)) insert(pat[i], i);
-		N[0].back = sz(N);
-		N.emplace_back(0);
-
-		queue<int> q;
-		for (q.push(0); !q.empty(); q.pop()) {
-			int n = q.front(), prev = N[n].back;
-			rep(i,0,alpha) {
-				int &ed = N[n].next[i], y = N[prev].next[i];
-				if (ed == -1) ed = y;
-				else {
-					N[ed].back = y;
-					(N[ed].end == -1 ? N[ed].end : backp[N[ed].start])
-						= N[y].end;
-					N[ed].nmatches += N[y].nmatches;
-					q.push(ed);
-				}
-			}
-		}
-	}
-	vi find(string word) {
-		int n = 0;
-		vi res; // ll count = 0;
-		for (char c : word) {
-			n = N[n].next[c - first];
-			res.push_back(N[n].end);
-			// count += N[n].nmatches;
-		}
-		return res;
-	}
-	vector<vi> findAll(vector<string>& pat, string word) {
-		vi r = find(word);
-		vector<vi> res(sz(word));
-		rep(i,0,sz(word)) {
-			int ind = r[i];
-			while (ind != -1) {
-				res[i - sz(pat[ind]) + 1].push_back(ind);
-				ind = backp[ind];
-			}
-		}
-		return res;
-	}
+struct node
+{
+    node *fail, *nxt[M], *children[M], *par;
+    int value, parChar, index;
+    node(node *_par = NULL, int _parChar = 0, int _index = 0)
+    {
+        par = _par, parChar = _parChar, index = _index;
+        for (int i = 0; i < M; ++i)
+            children[i] = nxt[i] = NULL;
+        fail = NULL, value = 0;
+    }
 };
+
+node nodes[N];
+int numNode = 0;
+
+node *createNode(node *par, int parChar)
+{
+    nodes[numNode] = node(par, parChar, numNode);
+    ++numNode;
+    return &nodes[numNode - 1];
+}
+queue<node *> q;
+int n, m, k;
+struct AhoCorasick
+{
+    node *root;
+    AhoCorasick()
+    {
+        root = createNode(NULL, -1);
+    }
+
+    void addString(const vector<int> &digits, int value)
+    {
+        node *tmp = root;
+        for (int i = 0; i < (int)digits.size(); ++i)
+        {
+            int c = digits[i];
+            if (tmp->children[c] == NULL)
+                tmp->children[c] = createNode(tmp, c);
+            tmp = tmp->children[c];
+        }
+        tmp->value += value;
+    }
+
+    void bfs()
+    {
+        // queue<*node > q;
+        root->fail = root;
+        for (int i = 0; i < m; ++i)
+            root->nxt[i] = root->children[i] != NULL ? root->children[i] : root;
+        root->value = 0;
+
+        for (int i = 0; i < m; ++i)
+            if (root->children[i] != NULL)
+                q.push(root->children[i]);
+        while (q.size())
+        {
+            node *u = q.front();
+            q.pop();
+            u->fail = u->par == root ? root : u->par->fail->nxt[u->parChar];
+            u->value += u->fail->value;
+            for (int i = 0; i < m; ++i)
+            {
+                u->nxt[i] = (u->children[i] != NULL ? u->children[i] : u->fail->nxt[i]);
+            }
+            for (int i = 0; i < m; ++i)
+            {
+                if (u->children[i] != NULL)
+                    q.push(u->children[i]);
+            }
+        }
+    }
+} AC;
