@@ -2,7 +2,6 @@
  * Description: Lichao Tree for maximum convex hull trick.
  * Time: O(logn) per operation.
  */
-
 const int N = (int)2e5 + 228;
 const long long INF = (long long)1e18;
 
@@ -34,7 +33,7 @@ struct LichaoTree
         tree.assign(n * 4 + 7, line(INF, INF));
     }
 
-    // upd đoạn thẳng cho các giá trị x từ l -> r
+    // update line for all x from l to r
     void add(int id, int l, int r, line &x)
     {
         int len = (r - l + 1), m = l + (len + 1) / 2 - 1;
@@ -56,7 +55,7 @@ struct LichaoTree
         add(1, 1, n, x);
     }
 
-    // tính đoạn thẳng tốt nhất cho giá trị x
+    // find line with optimal value at x
     long long calc(int id, int l, int r, int k, long long x)
     {
         long long res = tree[id] * x;

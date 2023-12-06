@@ -6,8 +6,9 @@
 int mark[N], cl[N], sl[N], fa[N], id, facen[N];
 vector<int> a[N];
 
+// DFS the tree again after being split
 void DFS_size(int u)
-{ /// DFS lại đồ thị sau khi bị tách
+{
     cl[u] = id;
     sl[u] = 1;
     for (auto v : a[u])
@@ -41,7 +42,8 @@ void centroid(int u, int pa)
             break;
         u = luu;
     }
-    facen[u] = pa; /// Tạo cây centroid
+    // make centroid tree
+    facen[u] = pa;
     mark[u] = 1;
     for (auto v : a[u])
         if (mark[v] == 0)
