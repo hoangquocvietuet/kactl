@@ -1,3 +1,7 @@
+/**
+ * Description: flow algorithms
+*/
+
 ## Disjoint paths
 
 find maximum number paths
