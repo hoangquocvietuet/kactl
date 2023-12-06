@@ -1,7 +1,6 @@
 /**
- * Description: sum over all subsets of a set.
+ * Description: sum over all subsets of a set. for calculating sum over all superset, just reverse the loop.
  * Time: O(n \times 2^n).
- * Note: for calculating sum over all superset, just reverse the loop.
  */
 
 #include <bits/stdc++.h>

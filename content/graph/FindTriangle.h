@@ -1,7 +1,6 @@
 /**
  * Description: Find all triangles in a graph.
  * Time: O(N + M*sqrt(M))
- * Note: Index from 0
  */
 vector<tuple<int, int, int>> find_all_triangles(
     int n,
