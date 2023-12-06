@@ -22,7 +22,7 @@ node to the second node.
 
 ## Maximum matchings
 
-#### Hall’s theorem
+#### Hall's theorem
 
 Assume that we want to find a matching that contains all left nodes. Let X
 be any set of left nodes and let f (X) be the set of their neighbors. According to
